@@ -6,9 +6,11 @@ import boto.ec2
 from boto.exception import EC2ResponseError
 # from boto.rds import RDSConnection
 from boto.mturk.connection import MTurkConnection, MTurkRequestError
+import boto.mturk.notification
+
 from boto.mturk.question import ExternalQuestion
 from boto.mturk.qualification import LocaleRequirement, \
-    PercentAssignmentsApprovedRequirement, Qualifications
+    PercentAssignmentsApprovedRequirement, Qualifications, Requirement
 from flask import jsonify
 import re as re
 
@@ -54,6 +56,19 @@ MYSQL_RESERVED_WORDS_CAP = [
 ]
 MYSQL_RESERVED_WORDS = [word.lower() for word in MYSQL_RESERVED_WORDS_CAP]
 
+class MTurkQualificationType(object):
+    ''' Structure for dealing with MTurk Qualifications '''
+
+    def __init__(self,json_options):
+        self.options = json_options
+
+    def __repr__(self):
+        return "Name: %(name)s\nDescription: %(description)s\nStatus: %(status)s\nkeywords: %(keywords)s" % {
+            "name": self.options['name'],
+            "description": self.options['description'],
+            "status": self.options['status'],
+            "keywords": self.options['keywords'],
+        }
 
 class MTurkHIT(object):
     ''' Structure for dealing with MTurk HITs '''
@@ -295,7 +310,6 @@ class RDSServices(object):
         else:
             return True
 
-
 class MTurkServices(object):
     ''' MTurk services '''
     def __init__(self, aws_access_key_id, aws_secret_access_key, is_sandbox):
@@ -513,6 +527,13 @@ class MTurkServices(object):
         if hit_config['us_only']:
             quals.add(LocaleRequirement("EqualTo", "US"))
 
+        for qual in hit_config['qualifications']:
+            r = Requirement(qualification_type_id=qual['qualification_type_id'],
+                            comparator=qual['comparator'],
+                            integer_value=qual['value'],
+                            required_to_preview=qual['preview'])
+            quals.add(r)
+
         # Specify all the HIT parameters
         self.param_dict = dict(
             hit_type=None,
@@ -609,3 +630,25 @@ class MTurkServices(object):
         except MTurkRequestError as exception:
             print exception.error_message
             return False
+
+    def assign_qualification(self, worker_id, qualification_type_id):
+        try:
+            if not self.connect_to_turk():
+                return False
+            return self.mtc.assign_qualification(qualification_type_id=qualification_type_id, worker_id=worker_id, value=1 ,send_notification=False)
+        except MTurkRequestError as exception:
+            print exception.error_message
+            return False
+
+    def revoke_qualification(self, worker_id, qualification_type_id):
+        try:
+            if not self.connect_to_turk():
+                return False
+            return self.mtc.revoke_qualification(subject_id=worker_id, qualification_type_id=qualification_type_id)
+        except MTurkRequestError as exception:
+            print exception.error_message
+            return False
+
+    def worker_notification(self, worker_id, subject, message):
+        pass
+
