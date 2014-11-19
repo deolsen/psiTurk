@@ -635,7 +635,7 @@ class MTurkServices(object):
         try:
             if not self.connect_to_turk():
                 return False
-            return self.mtc.assign_qualification(qualification_type_id=qualification_type_id, worker_id=worker_id, value=1 ,send_notification=False)
+            return self.mtc.assign_qualification(qualification_type_id=qualification_type_id, worker_id=worker_id, value=1, send_notification=False)
         except MTurkRequestError as exception:
             print exception.error_message
             return False

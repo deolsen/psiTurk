@@ -966,7 +966,8 @@ class PsiturkNetworkShell(PsiturkShell):
                 "description": self.config.get('HIT Configuration', 'description'),
                 "keywords": self.config.get('HIT Configuration', 'amt_keywords'),
                 "reward": reward,
-                "duration": datetime.timedelta(hours=int(duration))
+                "duration": datetime.timedelta(hours=int(duration)),
+                "qualifications": json.loads(self.config.get('Qualifications', 'min_qualifications'))
             }
             hit_id = self.amt_services.create_hit(hit_config)
             if hit_id is not False:

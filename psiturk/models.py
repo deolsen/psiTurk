@@ -11,6 +11,7 @@ config.load_config()
 
 TABLENAME = config.get('Database Parameters', 'table_name')
 CODE_VERSION = config.get('Task Parameters', 'experiment_code_version')
+CONNECTION_STRING = config.get('Database Parameters', 'database_url')
 
 class Participant(Base):
     """
@@ -34,7 +35,10 @@ class Participant(Base):
     endhit = Column(DateTime)
     bonus = Column(Float, default = 0)
     status = Column(Integer, default = 1)
-    datastring = Column(Text(4294967295))
+    if CONNECTION_STRING[:8]=='postgres':
+        datastring = Column(Text())
+    else:
+        datastring = Column(Text(4294967295))
     
     def __init__(self, **kwargs):
         self.uniqueid = "{workerid}:{assignmentid}".format(**kwargs)
