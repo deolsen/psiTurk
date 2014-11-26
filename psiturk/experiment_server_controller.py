@@ -7,6 +7,10 @@ import urllib2
 import socket
 import psutil
 import time
+from psiturk_config import PsiturkConfig
+
+config = PsiturkConfig()
+config.load_config()
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -135,7 +139,8 @@ class ExperimentServerController:
                 pid.send_signal(signal.SIGTERM)
 
     def is_server_running(self):
-        PROCNAME = "psiturk_experiment_server"
+        PROCNAME = 'psiturk_%(procname)s_%(port)s' % {'procname': config.get('Server Parameters', 'procname'),
+                                                      'port': config.get('Server Parameters', 'port')}
         cmd = "ps -eo pid,command | grep '"+ PROCNAME + "' | grep -v grep | awk '{print $1}'"
         psiturk_exp_processes = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         output = psiturk_exp_processes.stdout.readlines()

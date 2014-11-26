@@ -62,7 +62,8 @@ class ExperimentServer(Application):
             'loglevel': self.loglevels[config.getint("Server Parameters", "loglevel")],
             # 'accesslog': config.get("Server Parameters", "logfile"),
             'errorlog': config.get("Server Parameters", "logfile"),
-            'proc_name': 'psiturk_experiment_server'
+            'proc_name': 'psiturk_%(procname)s_%(port)s' % {'procname': config.get('Server Parameters', 'procname'),
+                                                            'port': config.get('Server Parameters', 'port')}
         }
 
 def launch():

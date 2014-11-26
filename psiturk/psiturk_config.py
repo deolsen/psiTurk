@@ -35,7 +35,8 @@ class PsiturkConfig(SafeConfigParser):
         self.globalParser.read(self.globalFile)
         # read default global and local, then user's global and local. This way
         # any field not in the user's files will be set to the default value.
-        self.read([global_defaults_file, local_defaults_file, self.globalFile, self.localFile])
+        #self.read([global_defaults_file, local_defaults_file, self.globalFile, self.localFile])
+        self.read([self.globalFile, self.localFile])
 
     def write(self, changeGlobal=False):
         """

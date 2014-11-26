@@ -316,8 +316,9 @@ def give_consent():
 
 def get_ad_via_hitid(hit_id):
     ''' Get ad via HIT id '''
-    username = CONFIG.get('psiTurk Access', 'psiturk_access_key_id')
-    password = CONFIG.get('psiTurk Access', 'psiturk_secret_access_id')
+    credkey = CONFIG.get('HIT Configuration','cred_key')
+    username = CONFIG.get(credkey, 'psiturk_access_key_id')
+    password = CONFIG.get(credkey, 'psiturk_secret_access_id')
     try:
         req = requests.get('https://api.psiturk.org/api/ad/lookup/' + hit_id,
                            auth=(username, password))
