@@ -723,6 +723,31 @@ class PsiturkNetworkShell(PsiturkShell):
                 print "*** failed to bonus", assignment_id
 
     # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    #   qualification management
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    def add_worker_qualification(self, qualification_task_id, worker_ids=None):
+        for worker_id in worker_ids:
+            success = self.amt_services.assign_qualification(worker_id, qualification_task_id)
+            if success:
+                print 'Added %(worker)s to qualification.' % {"worker": worker_id}
+            else:
+                print '*** failed to add %(worker)s to qualification!' % {"worker": worker_id}
+
+    def revoke_worker_qualification(self, qualification_task_id, worker_ids=None):
+        for worker_id in worker_ids:
+            success = self.amt_services.revoke_qualification(worker_id, qualification_task_id)
+            if success:
+                print 'Removed %(worker)s from qualification.' % {"worker": worker_id}
+            else:
+                print '*** failed to remove %(worker)s from qualification!' % {"worker": worker_id}
+
+    def show_hit_qualifications(self,hit_id):
+        pass
+
+
+
+
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #   hit management
     # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def do_amt_balance(self, _):
@@ -955,6 +980,12 @@ class PsiturkNetworkShell(PsiturkShell):
         fail_msg = None
         ad_id = self.web_services.create_ad(ad_content)
         if ad_id is not False:
+            quals = []
+            try:
+                q = self.config.get('Qualifications', 'min_qualifications')
+                quals = json.loads(q)
+            except ValueError as exception:
+                print 'WARNING: qualifications either were not present or could not be parsed'
 
             hit_config = {
                 "ad_location": self.web_services.get_ad_url(ad_id, int(self.sandbox)),
@@ -967,7 +998,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 "keywords": self.config.get('HIT Configuration', 'amt_keywords'),
                 "reward": reward,
                 "duration": datetime.timedelta(hours=int(duration)),
-                "qualifications": json.loads(self.config.get('Qualifications', 'min_qualifications'))
+                "qualifications": quals
             }
             hit_id = self.amt_services.create_hit(hit_config)
             if hit_id is not False:
