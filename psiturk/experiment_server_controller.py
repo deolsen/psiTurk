@@ -138,7 +138,8 @@ class ExperimentServerController:
                 pid.send_signal(signal.SIGTERM)
 
     def is_server_running(self):
-        PROCNAME = 'psiturk_%(procname)s_%(port)s' % {'procname': config.get('Server Parameters'), 'port': config.get('Server Parameters', 'port')}
+        PROCNAME = 'psiturk_%(procname)s_%(port)s' % {'procname': config.get('Server Parameters', 'procname'),
+                                                      'port': config.get('Server Parameters', 'port')}
         cmd = "ps -eo pid,command | grep '"+ PROCNAME + "' | grep -v grep | awk '{print $1}'"
         psiturk_exp_processes = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         output = psiturk_exp_processes.stdout.readlines()
